@@ -244,14 +244,18 @@
       background: var(--prompter-bg);
       color: var(--prompter-color);
       font-size: var(--prompter-font-size);
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       font-weight: bold;
       text-align: center;
       z-index: 2147483647;
       display: none;
+      flex-direction: column;
       line-height: 1.5;
       box-sizing: border-box;
       border-radius: 20px;
       transition: all 0.3s ease-in-out, font-size 0.2s;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     #prompter.fullscreen {
       top: 0;
@@ -266,7 +270,7 @@
     }
     #prompter-text {
       width: 100%;
-      height: 100%;
+      flex: 1;
       padding: 60px 40px;
       box-sizing: border-box;
       overflow-y: auto;
@@ -276,6 +280,25 @@
       align-items: center;
       scroll-behavior: smooth;
     }
+    
+    /* Scrollbar moderna para el prompter */
+    #prompter-text::-webkit-scrollbar {
+      width: 8px;
+    }
+    #prompter-text::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      margin-top: 60px;
+      margin-bottom: 20px;
+    }
+    #prompter-text::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    #prompter-text::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
     .palabra-activa {
       background-color: var(--palabra-bg);
       color: var(--palabra-color);
@@ -490,7 +513,7 @@
   document.addEventListener('AL_MOSTRAR_PROMPTER', (e) => {
     textoActual = e.detail;
     textDiv.innerText = textoActual;
-    prompterDiv.style.display = 'block';
+    prompterDiv.style.display = 'flex';
   });
 
   document.addEventListener('AL_LEER_PALABRA', (e) => {
