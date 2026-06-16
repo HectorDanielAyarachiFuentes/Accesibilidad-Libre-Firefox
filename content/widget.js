@@ -53,6 +53,8 @@
       font-size: 14px;
     }
     .widget-btn {
+      display: flex;
+      align-items: center;
       background: none;
       border: none;
       border-bottom: 1px solid #eee;
@@ -60,15 +62,85 @@
       width: 100%;
       text-align: left;
       cursor: pointer;
-      font-size: 14px;
-      color: #333;
-      transition: background 0.2s;
+      font-size: 15px;
+      color: #444;
+      transition: background 0.3s, color 0.3s;
     }
     .widget-btn:hover {
       background: #f0f8ff;
+      color: #0078D7;
     }
     .widget-btn:last-child {
       border-bottom: none;
+    }
+    .icon-svg {
+      width: 22px;
+      height: 22px;
+      margin-right: 15px;
+      fill: currentColor;
+      transition: transform 0.3s, fill 0.3s;
+    }
+    .btn-text {
+      flex-grow: 1;
+    }
+    
+    /* Animations */
+    @keyframes sound-wave {
+      0%, 100% { opacity: 0.3; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+    .widget-btn:hover #svg-speaker-waves,
+    .widget-btn.active #svg-speaker-waves {
+      animation: sound-wave 1s infinite;
+      transform-origin: left center;
+    }
+
+    @keyframes rock-moon {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-15deg); }
+      75% { transform: rotate(15deg); }
+    }
+    .widget-btn:hover #svg-moon,
+    .widget-btn.active #svg-moon {
+      animation: rock-moon 2s infinite ease-in-out;
+      transform-origin: center;
+    }
+
+    @keyframes pulse-screen {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .widget-btn:hover #svg-prompter,
+    .widget-btn.active #svg-prompter {
+      animation: pulse-screen 1.5s infinite;
+      transform-origin: center;
+    }
+
+    @keyframes spin-refresh {
+      100% { transform: rotate(360deg); }
+    }
+    .widget-btn:hover #svg-broom {
+      animation: spin-refresh 1.5s linear infinite;
+      transform-origin: center;
+    }
+
+    @keyframes float-icon {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    #toggle-btn:hover svg {
+      animation: float-icon 2s infinite ease-in-out;
+    }
+
+    /* Active State Colors */
+    .widget-btn.active {
+      color: #0078D7;
+      background: #f0f8ff;
+      font-weight: bold;
+    }
+    .widget-btn.active.danger {
+      color: #d9534f;
+      background: #fdf0f0;
     }
     #toggle-btn {
       width: 50px;
@@ -173,12 +245,47 @@
   wrapper.innerHTML = `
     <div id="panel">
       <div id="panel-header">HERRAMIENTAS</div>
-      <button class="widget-btn" id="btn-leer">🔊 Leer página</button>
-      <button class="widget-btn" id="btn-oscuro">🌙 Modo oscuro</button>
-      <button class="widget-btn" id="btn-grande">A+ Texto grande</button>
-      <button class="widget-btn" id="btn-reset">🧹 Restablecer</button>
+      
+      <button class="widget-btn" id="btn-leer">
+        <svg viewBox="0 0 24 24" class="icon-svg">
+          <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+          <g id="svg-speaker-waves">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+            <path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </g>
+        </svg>
+        <span class="btn-text">Leer página</span>
+      </button>
+
+      <button class="widget-btn" id="btn-oscuro">
+        <svg viewBox="0 0 24 24" class="icon-svg" id="svg-moon">
+          <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4C12.92 3.04 12.46 3 12 3z"/>
+        </svg>
+        <span class="btn-text">Modo oscuro</span>
+      </button>
+
+      <button class="widget-btn" id="btn-grande">
+        <svg viewBox="0 0 24 24" class="icon-svg" id="svg-prompter">
+          <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
+          <rect x="6" y="8" width="12" height="2"/>
+          <rect x="6" y="12" width="8" height="2"/>
+        </svg>
+        <span class="btn-text">Texto grande</span>
+      </button>
+
+      <button class="widget-btn" id="btn-reset">
+        <svg viewBox="0 0 24 24" class="icon-svg" id="svg-broom">
+          <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        </svg>
+        <span class="btn-text">Restablecer</span>
+      </button>
+
     </div>
-    <button id="toggle-btn" title="Accesibilidad">♿</button>
+    <button id="toggle-btn" title="Accesibilidad">
+      <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: white;">
+        <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/>
+      </svg>
+    </button>
   `;
 
   const prompterDiv = document.createElement('div');
@@ -239,26 +346,24 @@
   });
 
   document.addEventListener('AL_LEER_ESTADO', (e) => {
+    const textSpan = btnLeer.querySelector('.btn-text');
     if (e.detail) {
-      btnLeer.innerHTML = '⏹️ Detener lectura';
-      btnLeer.style.color = '#d9534f';
-      btnLeer.style.fontWeight = 'bold';
+      textSpan.innerHTML = 'Detener lectura';
+      btnLeer.classList.add('active', 'danger');
     } else {
-      btnLeer.innerHTML = '🔊 Leer página';
-      btnLeer.style.color = '#333';
-      btnLeer.style.fontWeight = 'normal';
+      textSpan.innerHTML = 'Leer página';
+      btnLeer.classList.remove('active', 'danger');
     }
   });
 
   document.addEventListener('AL_PROMPTER_ESTADO', (e) => {
+    const textSpan = btnGrande.querySelector('.btn-text');
     if (e.detail) {
-      btnGrande.innerHTML = '✅ Prompter Activo';
-      btnGrande.style.color = '#5cb85c';
-      btnGrande.style.fontWeight = 'bold';
+      textSpan.innerHTML = 'Prompter Activo';
+      btnGrande.classList.add('active');
     } else {
-      btnGrande.innerHTML = 'A+ Texto grande';
-      btnGrande.style.color = '#333';
-      btnGrande.style.fontWeight = 'normal';
+      textSpan.innerHTML = 'Texto grande';
+      btnGrande.classList.remove('active');
     }
   });
 
