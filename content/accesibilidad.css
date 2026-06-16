@@ -1,0 +1,13 @@
+.accesibilidad-oscuro{
+background:#111 !important;
+color:#eee !important;
+}
+
+.accesibilidad-oscuro *{
+background:#111 !important;
+color:#eee !important;
+}
+
+body{
+line-height:1.6;
+}

@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Accesibilidad Libre",
+  "version": "1.0",
+  "description": "Herramientas gratuitas de accesibilidad: lector, perfiles, modos visuales y ajustes personales.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/lector.js"],
+      "css": ["content/accesibilidad.css"]
+    }
+  ]
+}
