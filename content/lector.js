@@ -17,11 +17,14 @@ function aplicarModoOscuro(activo) {
 }
 
 // Cargar configuración inicial
-browser.storage.local.get(['modoOscuro', 'zoomTexto']).then(res => {
+browser.storage.local.get(['modoOscuro', 'zoomTexto', 'modoLectura']).then(res => {
   if (res.modoOscuro) aplicarModoOscuro(true);
   if (res.zoomTexto) {
     currentZoom = res.zoomTexto;
     aplicarZoom(currentZoom);
+  }
+  if (res.modoLectura) {
+    setModoLectura(true);
   }
 });
 
@@ -34,6 +37,9 @@ browser.storage.onChanged.addListener((changes, area) => {
     if (changes.zoomTexto !== undefined) {
       currentZoom = changes.zoomTexto.newValue || 1.0;
       aplicarZoom(currentZoom);
+    }
+    if (changes.modoLectura !== undefined) {
+      setModoLectura(changes.modoLectura.newValue === true);
     }
   }
 });
@@ -76,8 +82,10 @@ function handleMouseOut(e) {
   }
 }
 
-function toggleModoLectura() {
-  modoLecturaActivo = !modoLecturaActivo;
+function setModoLectura(activo) {
+  if (modoLecturaActivo === activo) return;
+  modoLecturaActivo = activo;
+  
   if (modoLecturaActivo) {
     document.body.addEventListener('mouseover', handleMouseOver);
     document.body.addEventListener('mouseout', handleMouseOut);
@@ -91,13 +99,14 @@ function toggleModoLectura() {
     }
     speechSynthesis.cancel(); // detener lectura si se desactiva
   }
-  return modoLecturaActivo;
+  
+  document.dispatchEvent(new CustomEvent('AL_LEER_ESTADO', { detail: modoLecturaActivo }));
 }
 
 browser.runtime.onMessage.addListener(async msg => {
   if (msg === "leer") {
-    let activo = toggleModoLectura();
-    document.dispatchEvent(new CustomEvent('AL_LEER_ESTADO', { detail: activo }));
+    let res = await browser.storage.local.get('modoLectura');
+    await browser.storage.local.set({ modoLectura: !res.modoLectura });
   }
   if (msg === "oscuro") {
     let res = await browser.storage.local.get('modoOscuro');
@@ -112,15 +121,11 @@ browser.runtime.onMessage.addListener(async msg => {
     await browser.storage.local.set({ zoomTexto: nuevoZoom });
   }
   if (msg === "reset") {
-    await browser.storage.local.remove(['modoOscuro', 'zoomTexto']);
-    if (modoLecturaActivo) {
-      let activo = toggleModoLectura();
-      document.dispatchEvent(new CustomEvent('AL_LEER_ESTADO', { detail: activo }));
-    }
+    await browser.storage.local.remove(['modoOscuro', 'zoomTexto', 'modoLectura']);
   }
 });
 
-document.addEventListener("AL_LEER", () => {
-  let activo = toggleModoLectura();
-  document.dispatchEvent(new CustomEvent('AL_LEER_ESTADO', { detail: activo }));
+document.addEventListener("AL_LEER", async () => {
+  let res = await browser.storage.local.get('modoLectura');
+  await browser.storage.local.set({ modoLectura: !res.modoLectura });
 });
