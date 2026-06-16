@@ -12,3 +12,9 @@ body {
     cursor: crosshair !important;
     box-shadow: 0 0 10px rgba(0,0,0,0.5) !important;
 }
+
+/* Efecto Karaoke en la página nativa (CSS Custom Highlight API) */
+::highlight(al-karaoke) {
+  background-color: #FFD700;
+  color: #000;
+}

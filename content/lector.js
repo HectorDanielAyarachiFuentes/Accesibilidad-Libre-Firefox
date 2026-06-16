@@ -49,6 +49,87 @@ browser.storage.onChanged.addListener((changes, area) => {
 
 let modoLecturaActivo = false;
 let currentHighlightedElement = null;
+let textNodesMapping = [];
+
+function extractTextAndMap(element) {
+  let text = "";
+  textNodesMapping = [];
+  let walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+    acceptNode: function(node) {
+      let parent = node.parentNode;
+      if (parent && ['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
+      // Skip text nodes with only whitespace to keep TTS clean
+      if (node.nodeValue.trim() === '') return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  }, false);
+  
+  let node;
+  while ((node = walker.nextNode())) {
+    let nodeText = node.nodeValue;
+    // Add a space if needed to separate blocks
+    if (text.length > 0 && !text.endsWith(' ') && !nodeText.startsWith(' ')) {
+      text += ' ';
+    }
+    let start = text.length;
+    text += nodeText;
+    textNodesMapping.push({
+      node: node,
+      start: start,
+      end: text.length
+    });
+  }
+  return text;
+}
+
+function highlightWordOnPage(charIndex, charLength) {
+  if (!CSS.highlights) return;
+  
+  let targetStart = charIndex;
+  let targetEnd = charIndex + charLength;
+
+  let startNodeInfo = null;
+  let endNodeInfo = null;
+
+  for (let mapping of textNodesMapping) {
+    if (!startNodeInfo && targetStart >= mapping.start && targetStart < mapping.end) {
+      startNodeInfo = mapping;
+    }
+    if (!endNodeInfo && targetEnd > mapping.start && targetEnd <= mapping.end) {
+      endNodeInfo = mapping;
+    }
+    if (startNodeInfo && endNodeInfo) break;
+  }
+
+  // Fallback if it ends exactly at the node boundary
+  if (!endNodeInfo) {
+     for (let mapping of textNodesMapping) {
+       if (targetEnd === mapping.end) {
+         endNodeInfo = mapping;
+         break;
+       }
+     }
+  }
+
+  if (startNodeInfo && endNodeInfo) {
+    try {
+      let range = new Range();
+      range.setStart(startNodeInfo.node, targetStart - startNodeInfo.start);
+      range.setEnd(endNodeInfo.node, targetEnd - endNodeInfo.start);
+      
+      let highlight = new Highlight(range);
+      CSS.highlights.set('al-karaoke', highlight);
+    } catch(e) {
+      console.log("Error en karaoke:", e);
+    }
+  }
+}
+
+function clearHighlightOnPage() {
+  if (CSS.highlights) {
+    CSS.highlights.delete('al-karaoke');
+  }
+}
 
 function leer(texto) {
   if (!texto) return;
@@ -63,6 +144,9 @@ function leer(texto) {
         const match = remaining.match(/^[\wáéíóúñÁÉÍÓÚÑ]+/);
         length = match ? match[0].length : 1;
       }
+      
+      highlightWordOnPage(e.charIndex, length);
+
       document.dispatchEvent(new CustomEvent('AL_LEER_PALABRA', {
         detail: {
           charIndex: e.charIndex,
@@ -118,7 +202,7 @@ function handleMouseOver(e) {
 
   clearTimeout(hoverTimer);
   hoverTimer = setTimeout(() => {
-    let texto = currentHighlightedElement.innerText || currentHighlightedElement.textContent;
+    let texto = extractTextAndMap(currentHighlightedElement);
     
     // Mostramos el prompter primero para que ya tenga el texto antes de leer
     if (prompterActivo) {
@@ -135,13 +219,12 @@ function handleMouseOut(e) {
 
   let toElement = e.relatedTarget;
   
-  // Ignorar si el ratón se mueve HACIA el widget/prompter (esto permite scrollear el texto largo)
+  // Ignorar si el ratón se mueve HACIA el widget/prompter
   if (toElement && toElement.closest && toElement.closest('#accesibilidad-libre-root')) {
     return;
   }
   
-  // Si el ratón se mueve a un elemento hijo dentro de nuestro mismo bloque,
-  // ignoramos la salida para que no se corte ni parpadee.
+  // Si el ratón se mueve a un elemento hijo dentro de nuestro mismo bloque, ignoramos la salida.
   if (currentHighlightedElement && toElement && currentHighlightedElement.contains(toElement)) {
     return;
   }
@@ -151,8 +234,7 @@ function handleMouseOut(e) {
     currentHighlightedElement.classList.remove('al-resalte-lectura');
     currentHighlightedElement = null;
   }
-  // El prompter ya no se oculta al salir del ratón. 
-  // Se queda mostrando el último texto hasta que el usuario decida apagarlo o leer otro párrafo.
+  clearHighlightOnPage();
 }
 
 function setModoLectura(activo) {
@@ -170,8 +252,9 @@ function setModoLectura(activo) {
       currentHighlightedElement.classList.remove('al-resalte-lectura');
       currentHighlightedElement = null;
     }
-    speechSynthesis.cancel(); // detener lectura si se desactiva
-    document.dispatchEvent(new CustomEvent('AL_OCULTAR_PROMPTER')); // Ocultar prompter al apagar
+    clearHighlightOnPage();
+    speechSynthesis.cancel();
+    document.dispatchEvent(new CustomEvent('AL_OCULTAR_PROMPTER'));
   }
   
   document.dispatchEvent(new CustomEvent('AL_LEER_ESTADO', { detail: modoLecturaActivo }));
@@ -184,6 +267,7 @@ document.addEventListener('AL_OCULTAR_PROMPTER_MANUAL', () => {
     currentHighlightedElement.classList.remove('al-resalte-lectura');
     currentHighlightedElement = null;
   }
+  clearHighlightOnPage();
   speechSynthesis.cancel();
   document.dispatchEvent(new CustomEvent('AL_OCULTAR_PROMPTER'));
 });
