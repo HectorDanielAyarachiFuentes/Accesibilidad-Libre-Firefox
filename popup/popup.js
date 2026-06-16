@@ -1,6 +1,8 @@
 async function enviar(msg){
  const tabs = await browser.tabs.query({active:true,currentWindow:true});
- browser.tabs.sendMessage(tabs[0].id,msg);
+ if (tabs.length > 0) {
+   browser.tabs.sendMessage(tabs[0].id,msg);
+ }
 }
 
 document.getElementById("leer").onclick=()=>enviar("leer");
@@ -21,9 +23,11 @@ document.getElementById("guardar").onclick=async()=>{
 };
 
 document.getElementById("reset").onclick=async()=>{
- await browser.storage.local.clear();
+ // Remueve solo los ajustes visuales, manteniendo perfil e invitado
+ await browser.storage.local.remove(['modoOscuro', 'zoomTexto']);
+ // Enviamos mensaje de reset por si no salta el onChanged en la tab actual de inmediato
  enviar("reset");
- document.getElementById("estado").innerText="Configuración limpiada";
+ document.getElementById("estado").innerText="Configuración visual limpiada";
 };
 
 document.getElementById("invitado").onclick=async()=>{

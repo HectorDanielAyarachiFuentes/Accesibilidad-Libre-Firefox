@@ -1,13 +1,26 @@
-.accesibilidad-oscuro{
-background:#111 !important;
-color:#eee !important;
+.accesibilidad-oscuro {
+    filter: invert(1) hue-rotate(180deg);
+    background-color: #fff; /* Asegura un fondo base para invertir si la página es transparente */
 }
 
-.accesibilidad-oscuro *{
-background:#111 !important;
-color:#eee !important;
+/* Contra-inversión para no arruinar fotos o videos */
+.accesibilidad-oscuro img,
+.accesibilidad-oscuro video,
+.accesibilidad-oscuro picture,
+.accesibilidad-oscuro canvas {
+    filter: invert(1) hue-rotate(180deg);
 }
 
-body{
-line-height:1.6;
+body {
+    line-height: 1.6;
+    transition: font-size 0.2s ease-in-out, filter 0.3s ease-in-out;
+}
+
+/* Modo Lectura Interactivo */
+.al-resalte-lectura {
+    outline: 4px solid #FFD700 !important;
+    background-color: rgba(255, 215, 0, 0.3) !important;
+    color: #000 !important;
+    cursor: crosshair !important;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5) !important;
 }
