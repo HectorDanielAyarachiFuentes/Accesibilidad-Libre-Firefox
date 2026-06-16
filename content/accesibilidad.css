@@ -1,15 +1,3 @@
-.accesibilidad-oscuro {
-    filter: invert(1) hue-rotate(180deg);
-    background-color: #fff; /* Asegura un fondo base para invertir si la página es transparente */
-}
-
-/* Contra-inversión para no arruinar fotos o videos */
-.accesibilidad-oscuro img,
-.accesibilidad-oscuro video,
-.accesibilidad-oscuro picture,
-.accesibilidad-oscuro canvas {
-    filter: invert(1) hue-rotate(180deg);
-}
 
 body {
     line-height: 1.6;

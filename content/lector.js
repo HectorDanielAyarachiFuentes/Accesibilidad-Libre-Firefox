@@ -1,10 +1,18 @@
 let prompterActivo = false;
 
 function aplicarModoOscuro(activo) {
-  if (activo) {
-    document.body.classList.add("accesibilidad-oscuro");
+  if (typeof DarkReader !== 'undefined') {
+    if (activo) {
+      DarkReader.enable({
+        brightness: 100,
+        contrast: 90,
+        sepia: 10
+      });
+    } else {
+      DarkReader.disable();
+    }
   } else {
-    document.body.classList.remove("accesibilidad-oscuro");
+    console.error("DarkReader no está cargado.");
   }
 }
 

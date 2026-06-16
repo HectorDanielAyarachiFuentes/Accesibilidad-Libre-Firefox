@@ -16,6 +16,11 @@
   const style = document.createElement('style');
   style.textContent = `
     :host {
+      --prompter-bg: rgba(0, 0, 0, 0.95);
+      --prompter-color: #FFD700;
+      --prompter-font-size: 40px;
+      --palabra-bg: #FFD700;
+      --palabra-color: #000;
       all: initial; /* Reset all styles to prevent leaking from host */
     }
     #widget-wrapper {
@@ -142,6 +147,79 @@
       color: #d9534f;
       background: #fdf0f0;
     }
+
+    /* Submenu Settings */
+    .btn-settings {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 15px;
+      color: #777;
+      border-left: 1px solid #eee;
+    }
+    .btn-settings:hover {
+      color: #0078D7;
+      background: #f0f8ff;
+    }
+    .submenu {
+      background: #fafafa;
+      border-bottom: 1px solid #eee;
+      padding: 0 15px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+    }
+    .submenu.open {
+      max-height: 200px;
+      padding: 15px;
+    }
+    .submenu-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      font-size: 13px;
+      color: #555;
+    }
+    .submenu-row:last-child {
+      margin-bottom: 0;
+    }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #ccc;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #333;
+    }
+    .icon-btn:hover {
+      background: #e0e0e0;
+    }
+    .color-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .color-btn.selected {
+      border: 2px solid #0078D7;
+      transform: scale(1.1);
+    }
     #toggle-btn {
       width: 50px;
       height: 50px;
@@ -163,9 +241,9 @@
       transform: translateX(-50%);
       width: 90vw;
       max-height: 40vh;
-      background: rgba(0, 0, 0, 0.95);
-      color: #FFD700;
-      font-size: 40px;
+      background: var(--prompter-bg);
+      color: var(--prompter-color);
+      font-size: var(--prompter-font-size);
       font-weight: bold;
       text-align: center;
       z-index: 2147483647;
@@ -173,7 +251,7 @@
       line-height: 1.5;
       box-sizing: border-box;
       border-radius: 20px;
-      transition: all 0.3s ease-in-out;
+      transition: all 0.3s ease-in-out, font-size 0.2s;
     }
     #prompter.fullscreen {
       top: 0;
@@ -184,7 +262,7 @@
       height: 100vh;
       max-height: 100vh;
       border-radius: 0;
-      font-size: 55px;
+      font-size: calc(var(--prompter-font-size) * 1.375);
     }
     #prompter-text {
       width: 100%;
@@ -199,8 +277,8 @@
       scroll-behavior: smooth;
     }
     .palabra-activa {
-      background-color: #FFD700;
-      color: #000;
+      background-color: var(--palabra-bg);
+      color: var(--palabra-color);
       border-radius: 8px;
       padding: 2px 5px;
       transition: background-color 0.1s, color 0.1s;
@@ -264,14 +342,42 @@
         <span class="btn-text">Modo oscuro</span>
       </button>
 
-      <button class="widget-btn" id="btn-grande">
-        <svg viewBox="0 0 24 24" class="icon-svg" id="svg-prompter">
-          <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
-          <rect x="6" y="8" width="12" height="2"/>
-          <rect x="6" y="12" width="8" height="2"/>
-        </svg>
-        <span class="btn-text">Texto grande</span>
-      </button>
+      <div style="display:flex; border-bottom: 1px solid #eee;">
+        <button class="widget-btn" id="btn-grande" style="border-bottom:none;">
+          <svg viewBox="0 0 24 24" class="icon-svg" id="svg-prompter">
+            <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
+            <rect x="6" y="8" width="12" height="2"/>
+            <rect x="6" y="12" width="8" height="2"/>
+          </svg>
+          <span class="btn-text">Texto grande</span>
+        </button>
+        <button id="btn-prompter-settings" class="btn-settings" title="Ajustes de Lectura">
+          <svg viewBox="0 0 24 24" class="icon-svg" style="margin:0;">
+             <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Panel de Opciones del Prompter -->
+      <div id="prompter-options" class="submenu hidden">
+        <div class="submenu-row">
+          <span>Tamaño de Letra:</span>
+          <div class="btn-group">
+            <button id="btn-font-minus" class="icon-btn">-</button>
+            <span id="font-size-label">40px</span>
+            <button id="btn-font-plus" class="icon-btn">+</button>
+          </div>
+        </div>
+        <div class="submenu-row">
+          <span>Tema de Color:</span>
+          <div class="btn-group">
+            <button class="color-btn" data-theme="yellow" style="background:#000; color:#FFD700;">A</button>
+            <button class="color-btn" data-theme="white" style="background:#000; color:#FFF;">A</button>
+            <button class="color-btn" data-theme="black" style="background:#FFF; color:#000;">A</button>
+            <button class="color-btn" data-theme="green" style="background:#000; color:#0F0;">A</button>
+          </div>
+        </div>
+      </div>
 
       <button class="widget-btn" id="btn-reset">
         <svg viewBox="0 0 24 24" class="icon-svg" id="svg-broom">
@@ -430,6 +536,81 @@
 
   closeBtn.addEventListener('click', () => {
     document.dispatchEvent(new CustomEvent('AL_OCULTAR_PROMPTER_MANUAL'));
+  });
+
+  // --- Prompter Settings Logic ---
+  const btnPrompterSettings = shadow.getElementById('btn-prompter-settings');
+  const prompterOptions = shadow.getElementById('prompter-options');
+  const btnFontMinus = shadow.getElementById('btn-font-minus');
+  const btnFontPlus = shadow.getElementById('btn-font-plus');
+  const fontLabel = shadow.getElementById('font-size-label');
+  const colorBtns = shadow.querySelectorAll('.color-btn');
+
+  let currentFontSize = 40;
+  let currentTheme = 'yellow';
+
+  const themes = {
+    'yellow': { bg: 'rgba(0, 0, 0, 0.95)', color: '#FFD700', activeBg: '#FFD700', activeColor: '#000' },
+    'white': { bg: 'rgba(0, 0, 0, 0.95)', color: '#FFFFFF', activeBg: '#FFFFFF', activeColor: '#000' },
+    'black': { bg: 'rgba(255, 255, 255, 0.95)', color: '#000000', activeBg: '#000000', activeColor: '#FFF' },
+    'green': { bg: 'rgba(0, 0, 0, 0.95)', color: '#00FF00', activeBg: '#00FF00', activeColor: '#000' }
+  };
+
+  btnPrompterSettings.addEventListener('click', () => {
+    prompterOptions.classList.toggle('open');
+  });
+
+  function applySettings() {
+    fontLabel.innerText = currentFontSize + 'px';
+    container.style.setProperty('--prompter-font-size', currentFontSize + 'px');
+    
+    const theme = themes[currentTheme];
+    if (theme) {
+      container.style.setProperty('--prompter-bg', theme.bg);
+      container.style.setProperty('--prompter-color', theme.color);
+      container.style.setProperty('--palabra-bg', theme.activeBg);
+      container.style.setProperty('--palabra-color', theme.activeColor);
+    }
+
+    colorBtns.forEach(btn => {
+      if (btn.dataset.theme === currentTheme) btn.classList.add('selected');
+      else btn.classList.remove('selected');
+    });
+
+    // Guardar
+    browser.storage.local.set({
+      prompterSettings: { fontSize: currentFontSize, theme: currentTheme }
+    });
+  }
+
+  btnFontMinus.addEventListener('click', () => {
+    if (currentFontSize > 20) {
+      currentFontSize -= 5;
+      applySettings();
+    }
+  });
+
+  btnFontPlus.addEventListener('click', () => {
+    if (currentFontSize < 100) {
+      currentFontSize += 5;
+      applySettings();
+    }
+  });
+
+  colorBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentTheme = btn.dataset.theme;
+      applySettings();
+    });
+  });
+
+  // Load initial settings
+  browser.storage.local.get('prompterSettings').then(res => {
+    if (res.prompterSettings) {
+      currentFontSize = res.prompterSettings.fontSize || 40;
+      currentTheme = res.prompterSettings.theme || 'yellow';
+      applySettings();
+    }
   });
 
 })();
