@@ -1,24 +1,41 @@
 let prompterActivo = false;
 
-function aplicarModoOscuro(activo) {
+const matricesDaltonismo = {
+  protanopia: "0.567 0.433 0 0 0  0.558 0.442 0 0 0  0 0.242 0.758 0 0  0 0 0 1 0",
+  deuteranopia: "0.625 0.375 0 0 0  0.7 0.3 0 0 0  0 0.3 0.7 0 0  0 0 0 1 0",
+  tritanopia: "0.95 0.05 0 0 0  0 0.433 0.567 0 0  0 0.475 0.525 0 0  0 0 0 1 0"
+};
+
+function getSvgFilterUri(type) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg"><filter id="f"><feColorMatrix type="matrix" values="${matricesDaltonismo[type]}"/></filter></svg>`;
+  return `url('data:image/svg+xml;base64,${btoa(svg)}#f')`;
+}
+
+function aplicarFiltroVisual(filtro) {
+  // Limpiar filtros previos
   if (typeof DarkReader !== 'undefined') {
-    if (activo) {
-      DarkReader.enable({
-        brightness: 100,
-        contrast: 90,
-        sepia: 10
-      });
-    } else {
-      DarkReader.disable();
-    }
-  } else {
-    console.error("DarkReader no está cargado.");
+    DarkReader.disable();
+  }
+  document.documentElement.style.removeProperty('filter');
+
+  if (filtro === 'oscuro') {
+    if (typeof DarkReader !== 'undefined') DarkReader.enable({ brightness: 100, contrast: 90, sepia: 10 });
+  } else if (filtro === 'sepia') {
+    if (typeof DarkReader !== 'undefined') DarkReader.enable({ brightness: 100, contrast: 90, sepia: 100 });
+  } else if (filtro === 'alto-contraste') {
+    if (typeof DarkReader !== 'undefined') DarkReader.enable({ brightness: 100, contrast: 150, sepia: 0 });
+  } else if (filtro === 'protanopia' || filtro === 'deuteranopia' || filtro === 'tritanopia') {
+    document.documentElement.style.setProperty('filter', `url("${currentUrl}#al-filter-${filtro}")`, 'important');
+  } else if (filtro === 'acromatopsia') {
+    document.documentElement.style.setProperty('filter', 'grayscale(100%)', 'important');
   }
 }
 
 // Cargar configuración inicial
-browser.storage.local.get(['modoOscuro', 'prompterActivo', 'modoLectura']).then(res => {
-  if (res.modoOscuro) aplicarModoOscuro(true);
+browser.storage.local.get(['filtroVisual', 'prompterActivo', 'modoLectura']).then(res => {
+  let filtro = res.filtroVisual || 'normal';
+  aplicarFiltroVisual(filtro);
+  document.dispatchEvent(new CustomEvent('AL_FILTRO_ESTADO', { detail: filtro }));
   if (res.prompterActivo) {
     prompterActivo = true;
     document.dispatchEvent(new CustomEvent('AL_PROMPTER_ESTADO', { detail: true }));
@@ -31,8 +48,10 @@ browser.storage.local.get(['modoOscuro', 'prompterActivo', 'modoLectura']).then(
 // Escuchar cambios de otras pestañas o del popup
 browser.storage.onChanged.addListener((changes, area) => {
   if (area === 'local') {
-    if (changes.modoOscuro !== undefined) {
-      aplicarModoOscuro(changes.modoOscuro.newValue === true);
+    if (changes.filtroVisual !== undefined) {
+      let nuevoFiltro = changes.filtroVisual.newValue || 'normal';
+      aplicarFiltroVisual(nuevoFiltro);
+      document.dispatchEvent(new CustomEvent('AL_FILTRO_ESTADO', { detail: nuevoFiltro }));
     }
     if (changes.prompterActivo !== undefined) {
       prompterActivo = changes.prompterActivo.newValue === true;
@@ -285,8 +304,9 @@ browser.runtime.onMessage.addListener(async msg => {
     await browser.storage.local.set({ modoLectura: !res.modoLectura });
   }
   if (msg === "oscuro") {
-    let res = await browser.storage.local.get('modoOscuro');
-    await browser.storage.local.set({ modoOscuro: !res.modoOscuro });
+    let res = await browser.storage.local.get('filtroVisual');
+    let nuevoFiltro = (res.filtroVisual && res.filtroVisual !== 'normal') ? 'normal' : 'oscuro';
+    await browser.storage.local.set({ filtroVisual: nuevoFiltro });
   }
   if (msg === "grande") {
     let res = await browser.storage.local.get(['prompterActivo', 'modoLectura']);
@@ -304,7 +324,7 @@ browser.runtime.onMessage.addListener(async msg => {
     document.dispatchEvent(new CustomEvent('AL_PROMPTER_ESTADO', { detail: nuevoEstado }));
   }
   if (msg === "reset") {
-    await browser.storage.local.remove(['modoOscuro', 'prompterActivo', 'modoLectura']);
+    await browser.storage.local.remove(['filtroVisual', 'prompterActivo', 'modoLectura']);
   }
 });
 

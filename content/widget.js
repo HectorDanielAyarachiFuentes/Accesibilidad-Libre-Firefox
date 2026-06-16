@@ -358,12 +358,30 @@
         <span class="btn-text">Leer página</span>
       </button>
 
-      <button class="widget-btn" id="btn-oscuro">
-        <svg viewBox="0 0 24 24" class="icon-svg" id="svg-moon">
-          <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4C12.92 3.04 12.46 3 12 3z"/>
-        </svg>
-        <span class="btn-text">Modo oscuro</span>
-      </button>
+      <div style="display:flex; border-bottom: 1px solid #eee;">
+        <button class="widget-btn" id="btn-oscuro" style="border-bottom:none;">
+          <svg viewBox="0 0 24 24" class="icon-svg" id="svg-moon">
+            <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4C12.92 3.04 12.46 3 12 3z"/>
+          </svg>
+          <span class="btn-text">Filtros visuales</span>
+        </button>
+        <button id="btn-visual-settings" class="btn-settings" title="Configurar Filtros">
+          <svg viewBox="0 0 24 24" class="icon-svg" style="margin:0;">
+             <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="visual-options" class="submenu hidden" style="display:flex; flex-direction:column; gap:8px; padding: 0 15px;">
+        <label style="cursor:pointer; display:flex; gap:8px; font-size:14px; color:#444;"><input type="radio" name="visual-filter" value="normal" checked> Normal (Desactivado)</label>
+        <label style="cursor:pointer; display:flex; gap:8px; font-size:14px; color:#444;"><input type="radio" name="visual-filter" value="oscuro"> Modo Oscuro</label>
+        <label style="cursor:pointer; display:flex; gap:8px; font-size:14px; color:#444;"><input type="radio" name="visual-filter" value="sepia"> Luz Cálida (Sepia)</label>
+        <label style="cursor:pointer; display:flex; gap:8px; font-size:14px; color:#444;"><input type="radio" name="visual-filter" value="alto-contraste"> Alto Contraste</label>
+        <label style="cursor:pointer; display:flex; gap:8px; font-size:14px; color:#444;"><input type="radio" name="visual-filter" value="protanopia"> Daltonismo: Protanopia</label>
+        <label style="cursor:pointer; display:flex; gap:8px; font-size:14px; color:#444;"><input type="radio" name="visual-filter" value="deuteranopia"> Daltonismo: Deuteranopia</label>
+        <label style="cursor:pointer; display:flex; gap:8px; font-size:14px; color:#444;"><input type="radio" name="visual-filter" value="tritanopia"> Daltonismo: Tritanopia</label>
+        <label style="cursor:pointer; display:flex; gap:8px; font-size:14px; color:#444;"><input type="radio" name="visual-filter" value="acromatopsia"> Escala de Grises</label>
+      </div>
 
       <div style="display:flex; border-bottom: 1px solid #eee;">
         <button class="widget-btn" id="btn-grande" style="border-bottom:none;">
@@ -462,8 +480,56 @@
   });
 
   btnOscuro.addEventListener('click', async () => {
-    let res = await browser.storage.local.get('modoOscuro');
-    await browser.storage.local.set({ modoOscuro: !res.modoOscuro });
+    let res = await browser.storage.local.get('filtroVisual');
+    // Toggle simple al hacer clic en el botón principal: Normal -> Oscuro -> Normal
+    let nuevoFiltro = (res.filtroVisual && res.filtroVisual !== 'normal') ? 'normal' : 'oscuro';
+    await browser.storage.local.set({ filtroVisual: nuevoFiltro });
+  });
+
+  const btnVisualSettings = shadow.getElementById('btn-visual-settings');
+  const visualOptions = shadow.getElementById('visual-options');
+  const visualRadios = shadow.querySelectorAll('input[name="visual-filter"]');
+
+  btnVisualSettings.addEventListener('click', () => {
+    visualOptions.classList.toggle('open');
+    if (visualOptions.classList.contains('open')) {
+      visualOptions.style.padding = "15px";
+      visualOptions.style.maxHeight = "300px";
+    } else {
+      visualOptions.style.padding = "0 15px";
+      visualOptions.style.maxHeight = "0";
+    }
+  });
+
+  visualRadios.forEach(radio => {
+    radio.addEventListener('change', async (e) => {
+      await browser.storage.local.set({ filtroVisual: e.target.value });
+    });
+  });
+
+  // Escuchar estado global de filtros visuales para actualizar UI
+  document.addEventListener('AL_FILTRO_ESTADO', (e) => {
+    const filtro = e.detail || 'normal';
+    const textSpan = btnOscuro.querySelector('.btn-text');
+    
+    // Seleccionar radio button correspondiente
+    shadow.querySelector(`input[name="visual-filter"][value="${filtro}"]`).checked = true;
+
+    if (filtro !== 'normal') {
+      btnOscuro.classList.add('active');
+      let label = "Filtro Activo";
+      if(filtro==='oscuro') label = "Modo Oscuro";
+      if(filtro==='sepia') label = "Luz Cálida";
+      if(filtro==='alto-contraste') label = "Alto Contraste";
+      if(filtro==='protanopia') label = "Protanopia";
+      if(filtro==='deuteranopia') label = "Deuteranopia";
+      if(filtro==='tritanopia') label = "Tritanopia";
+      if(filtro==='acromatopsia') label = "Escala Grises";
+      textSpan.innerHTML = label;
+    } else {
+      btnOscuro.classList.remove('active');
+      textSpan.innerHTML = 'Filtros visuales';
+    }
   });
 
   btnGrande.addEventListener('click', () => {
@@ -471,7 +537,8 @@
   });
 
   btnReset.addEventListener('click', async () => {
-    await browser.storage.local.remove(['modoOscuro', 'zoomTexto']);
+    await browser.storage.local.remove(['filtroVisual', 'prompterSettings']);
+    await browser.storage.local.set({ filtroVisual: 'normal', prompterActivo: false, modoLectura: false });
   });
 
   document.addEventListener('AL_LEER_ESTADO', (e) => {
