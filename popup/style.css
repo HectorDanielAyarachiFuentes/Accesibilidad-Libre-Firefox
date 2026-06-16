@@ -1,12 +1,242 @@
-body{
-width:260px;
-font-family:Arial;
-padding:12px;
+:root {
+  --primary: #4F46E5;
+  --primary-hover: #4338CA;
+  --bg-color: #F8FAFC;
+  --surface: #FFFFFF;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --border: #E2E8F0;
+  --danger: #EF4444;
+  --danger-hover: #DC2626;
+  --guest: #0EA5E9;
+  --guest-hover: #0284C7;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --ring: 0 0 0 2px var(--bg-color), 0 0 0 4px var(--primary);
 }
 
-button{
-width:100%;
-margin:5px;
-padding:8px;
-cursor:pointer;
+body {
+  width: 320px;
+  margin: 0;
+  padding: 16px;
+  background-color: var(--bg-color);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-main);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: var(--primary);
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.button-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  font-family: inherit;
+}
+
+button svg {
+  width: 18px;
+  height: 18px;
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--surface);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background-color: #F1F5F9;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--border);
+  margin: 16px 0;
+}
+
+.profile-section {
+  background-color: var(--surface);
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--text-main);
+}
+
+.profile-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.profile-header svg {
+  width: 18px;
+  height: 18px;
+  color: var(--primary);
+}
+
+.select-wrapper {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+select {
+  width: 100%;
+  appearance: none;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  padding-right: 32px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+select:focus {
+  border-color: var(--primary);
+}
+
+.select-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.save-wrapper {
+  display: flex;
+  gap: 6px;
+}
+
+input {
+  flex: 1;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+
+input:focus {
+  border-color: var(--primary);
+}
+
+.btn-save {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 8px;
+  background-color: var(--primary);
+  color: white;
+  border-radius: 8px;
+}
+
+.btn-save:hover {
+  background-color: var(--primary-hover);
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn-danger {
+  background-color: #FEF2F2;
+  color: var(--danger);
+  border: 1px solid #FEE2E2;
+}
+
+.btn-danger:hover {
+  background-color: #FEE2E2;
+  color: var(--danger-hover);
+}
+
+.btn-guest {
+  background-color: #F0F9FF;
+  color: var(--guest);
+  border: 1px solid #E0F2FE;
+}
+
+.btn-guest:hover {
+  background-color: #E0F2FE;
+  color: var(--guest-hover);
+}
+
+.status-bar {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+#estado {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
